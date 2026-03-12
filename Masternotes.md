@@ -3,7 +3,7 @@
 ### Step 1: Load software environment
 >#navigate to home directory to start the workflow\
 cd ~
->#load the Anaconda module on the HPC so conda and bioinformatics packages are available\
+/#load the Anaconda module on the HPC so conda and bioinformatics packages are available\
 module load anaconda3
 ### Step 2: Create and activate SRA toolkit environment
 #create a new conda environment called sra_env and install the SRA toolkit from the bioconda channel\
