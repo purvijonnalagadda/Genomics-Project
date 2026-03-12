@@ -23,3 +23,6 @@ prefetch SAMN08784165
 cd SRR6996007
 #convert the .sra sequencing file into FASTQ format for downstream analysis
 fasterq-dump SRR6996007.sra
+
+### Step ___: FastQc on Trimmed Files
+Input Read Pairs: 1000988 Both Surviving: 741232 (74.05%) Forward Only Surviving: 172918 (17.27%) Reverse Only Surviving: 32678 (3.26%) Dropped: 54160 (5.41%)
