@@ -2,7 +2,7 @@
 ## 3/12 Goal: Download and Clean Reads
 ### Step 1: Load software environment
 #navigate to home directory to start the workflow\
-cd ~\
+cd ~
 #load the Anaconda module on the HPC so conda and bioinformatics packages are available\
 module load anaconda3\
 ### Step 2: Create and activate SRA toolkit environment
