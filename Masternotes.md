@@ -236,4 +236,7 @@ project_fastq/
 ```
 # Date: 3/17/2026
 ## Absolute Path to Fastq Files
+```bash
+# Identify full path to trimmed reads
 /home/netid/project_fastq/trimmed
+```
