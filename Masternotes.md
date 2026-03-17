@@ -1,7 +1,6 @@
 # New Project Notes
 
-## Date
-3/12
+# Date: 3/12/2026
 
 ## Goal
 Download sequencing reads from SRA and perform quality control and trimming.
@@ -235,3 +234,6 @@ project_fastq/
     ├── SRR6996007_R1_paired_fastqc.html
     └── SRR6996007_R2_paired_fastqc.html
 ```
+# Date: 3/17/2026
+## Absolute Path to Fastq Files
+/home/netid/project_fastq/trimmed
