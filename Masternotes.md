@@ -414,6 +414,7 @@ checkpoints.txt  done  final.contigs.fa  intermediate_contigs  log  options.json
 module load mamba
 mamba install -n megahit-env -c bioconda seqkit
 mamba activate megahit-env
+```
 ---
 
 ## Results
