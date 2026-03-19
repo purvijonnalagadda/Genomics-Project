@@ -358,21 +358,13 @@ SLURM script:
 #SBATCH --mail-user=pj288@georgetown.edu
 #SBATCH --mail-type=END,FAIL
 
-# note %j = job ID
-
 module load mamba
-source $(mamba info --base)/etc/profile.d/conda.sh
+mamba activate megahit-env
 
-conda activate megahit-env
-
-# directory where the trimmed reads live
 READDIR=/home/pj288/project_fastq/trimmed
-
-# input read files (paired-end)
 READ1=${READDIR}/R1_paired.fastq.gz
 READ2=${READDIR}/R2_paired.fastq.gz
 
-# output directory
 OUTDIR=/home/pj288/project_fastq/assembly/megahit_SRR6996007_out
 
 megahit \
