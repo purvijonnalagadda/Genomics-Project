@@ -784,7 +784,112 @@ The filtered file for downstream analysis is:
 final-viral-combined_min5kb.fa
 ```
 ---
+## Step 12: Cluster viral contigs into vOTUs with vclust
 
+Create and activate a new environment for vclust:
+
+```bash
+module load mamba
+mamba create -y -n votu-env -c bioconda -c conda-forge vclust
+mamba activate votu-env
+```
+
+Verify installation:
+
+```bash
+vclust --help | head
+```
+
+Run vclust on the filtered viral contigs file:
+
+```bash
+cd /home/pj288/project_fastq/virsorter/vs2-SRR6996007
+```
+
+Prefilter similar genome pairs:
+
+```bash
+vclust prefilter \
+  -i final-viral-combined_min5kb.fa \
+  -o fltr.txt
+```
+
+Align sequences and calculate ANI:
+
+```bash
+vclust align \
+  -i final-viral-combined_min5kb.fa \
+  -o ani.tsv \
+  --filter fltr.txt
+```
+
+Cluster sequences into vOTUs at 95% ANI:
+
+```bash
+vclust cluster \
+  -i ani.tsv \
+  -o clusters.tsv \
+  --ids ani.ids.tsv \
+  --metric ani \
+  --ani 0.95 \
+  --out-repr
+```
+
+### Results
+
+The clustering step reported:
+
+- **17 total objects**
+- **17 total clusters (including singletons)**
+
+This indicates that none of the viral contigs clustered together at the 95% ANI threshold, so each contig represented its own vOTU.
+
+---
+
+## Step 13: Extract vOTU representative sequences
+
+Generate a list of vOTU seed IDs from the clustering output. Because `clusters.tsv` contains a header row, skip the first line when extracting IDs:
+
+```bash
+tail -n +2 clusters.tsv | awk '{print $2}' | sort -u > votu_seeds.txt
+```
+
+Switch back to the environment containing SeqKit:
+
+```bash
+mamba deactivate
+mamba activate megahit-env
+```
+
+Extract the representative vOTU sequences:
+
+```bash
+seqkit grep -f votu_seeds.txt final-viral-combined_min5kb.fa > votus_final.fna
+```
+
+Sanity checks:
+
+```bash
+wc -l votu_seeds.txt
+grep -c ">" votus_final.fna
+```
+
+Output:
+
+```bash
+17 votu_seeds.txt
+17
+```
+
+---
+
+## Interpretation
+
+- VirSorter2 identified **17 viral contigs**
+- Filtering confirmed that **all 17 contigs were ≥ 5 kb**
+- vclust grouped the sequences into **17 vOTUs**
+- Therefore, each viral contig represented a unique viral operational taxonomic unit
+- `votus_final.fna` contains the final non-redundant representative viral sequences for downstream analysis
 ## Updated Project Directory Structure
 
 ```
