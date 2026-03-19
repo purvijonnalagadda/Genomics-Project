@@ -487,3 +487,229 @@ project_fastq/
 │
 └── projectfastqc_out/
 ```
+# Date: 3/19/2026
+
+## Goal
+Identify viral contigs from assembled metagenomic data using VirSorter2, including environment setup, database installation, and SLURM-based execution.
+
+---
+
+## Workflow Overview
+
+1. Load mamba and create VirSorter2 environment  
+2. Verify installation  
+3. Set up VirSorter2 database (fix conda issue)  
+4. Prepare directories  
+5. Create and run SLURM script  
+6. Monitor job  
+7. Check logs  
+8. Interpret results  
+
+---
+
+## Step 1: Load environment and create VirSorter2 environment
+
+```bash
+module load mamba
+mamba create -y -n vs2-env -c conda-forge -c bioconda virsorter
+mamba activate vs2-env
+```
+
+---
+
+## Step 2: Verify installation
+
+```bash
+which virsorter
+virsorter --help | head
+```
+
+Expected:
+```bash
+~/.conda/envs/vs2-env/bin/virsorter
+```
+
+---
+
+## Step 3: Set up VirSorter2 database (working fix)
+
+```bash
+rm -rf /home/pj288/db
+rm -rf /home/pj288/.snakemake/conda
+virsorter setup -d /home/pj288/db -j 4 --conda-frontend conda
+```
+
+Successful completion:
+```bash
+[INFO] Dependencies installed
+[INFO] All setup finished
+```
+
+---
+
+## Step 4: Prepare directories
+
+```bash
+cd /home/pj288/project_fastq
+mkdir -p virsorter
+mkdir -p logs
+```
+
+---
+
+## Step 5: Create SLURM script
+
+```bash
+nano virsorter_run.sh
+```
+
+Paste:
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=virsorter_SRR6996007
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=20G
+#SBATCH --time=03:00:00
+#SBATCH --mail-user=pj288@georgetown.edu
+#SBATCH --mail-type=END,FAIL
+#SBATCH --output=/home/pj288/project_fastq/logs/virsorter.%j.out
+#SBATCH --error=/home/pj288/project_fastq/logs/virsorter.%j.err
+
+module load mamba
+source $(mamba info --base)/etc/profile.d/conda.sh
+mamba activate vs2-env
+
+INDIR=/home/pj288/project_fastq/assembly/megahit_SRR6996007_out
+OUTROOT=/home/pj288/project_fastq/virsorter
+SAMPLE_ID=SRR6996007
+
+INPUT=${INDIR}/final.contigs.fa
+OUTDIR=${OUTROOT}/vs2-${SAMPLE_ID}
+
+mkdir -p "${OUTDIR}"
+
+virsorter run \
+  -w "${OUTDIR}" \
+  -i "${INPUT}" \
+  --keep-original-seq \
+  --include-groups dsDNAphage,NCLDV,ssDNA \
+  --min-length 5000
+
+echo "Done. Results in: ${OUTDIR}"
+```
+
+---
+
+## Step 6: Submit job
+
+```bash
+sbatch virsorter_run.sh
+```
+
+Example:
+```bash
+Submitted batch job 28245
+```
+
+---
+
+## Step 7: Monitor job
+
+```bash
+squeue -u pj288
+```
+
+Running:
+```bash
+JOBID PARTITION NAME USER ST TIME NODES
+28245 base1 virsorte pj288 R ...
+```
+
+Finished:
+```bash
+# no output → job complete
+```
+
+---
+
+## Step 8: Check logs
+
+```bash
+cd /home/pj288/project_fastq/logs
+ls
+cat virsorter.<jobID>.err
+```
+
+---
+
+## Results
+
+### Filtering
+
+```bash
+# of seqs < 5000 bp removed: 20270
+# of circular seqs: 1
+# of linear seqs: 17
+```
+
+### Viral Detection
+
+```bash
+Full viral contigs: 17
+Partial viral contigs: 0
+Short viral contigs: 0
+```
+
+### Interpretation
+
+- Most contigs were removed due to length (<5 kb)  
+- 17 contigs were confidently identified as viral  
+- Presence of 1 circular contig suggests a potential complete viral genome  
+- Results are consistent with fragmented metagenomic assembly  
+
+---
+
+## Step 9: Inspect output
+
+```bash
+cd /home/pj288/project_fastq/virsorter/vs2-SRR6996007
+ls
+```
+
+Output:
+
+```bash
+config.yaml
+final-viral-boundary.tsv
+final-viral-combined.fa
+final-viral-score.tsv
+iter-0
+log
+```
+
+---
+
+## Updated Project Directory Structure
+
+```
+project_fastq/
+│
+├── assembly/
+│   └── megahit_SRR6996007_out/
+│       └── final.contigs.fa
+│
+├── virsorter/
+│   └── vs2-SRR6996007/
+│       ├── final-viral-combined.fa
+│       ├── final-viral-score.tsv
+│       ├── final-viral-boundary.tsv
+│       ├── config.yaml
+│       └── log/
+│
+├── logs/
+│   └── virsorter.<jobID>.out/.err
+│
+└── raw/ trimmed/ projectfastqc_out/
+```
