@@ -646,49 +646,8 @@ cat virsorter.<jobID>.err
 
 ## Results
 
-### Filtering
-
-```bash
-# of seqs < 5000 bp removed: 20270
-# of circular seqs: 1
-# of linear seqs: 17
 ```
-
-### Viral Detection
-
-```bash
-Full viral contigs: 17
-Partial viral contigs: 0
-Short viral contigs: 0
-```
-
-### Interpretation
-
-- Most contigs were removed due to length (<5 kb)  
-- 17 contigs were confidently identified as viral  
-- Presence of 1 circular contig suggests a potential complete viral genome  
-- Results are consistent with fragmented metagenomic assembly  
-
----
-
-## Step 9: Inspect output
-
-```bash
-cd /home/pj288/project_fastq/virsorter/vs2-SRR6996007
-ls
-```
-
-Output:
-
-```bash
-config.yaml
-final-viral-boundary.tsv
-final-viral-combined.fa
-final-viral-score.tsv
-iter-0
-log
-```
-## Step 10: Locate VirSorter2 results and count viral contigs
+## Step 9: Locate VirSorter2 results and count viral contigs
 
 After VirSorter2 finished, navigate to the output directory and inspect the result files.
 
