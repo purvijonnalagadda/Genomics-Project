@@ -688,7 +688,101 @@ final-viral-score.tsv
 iter-0
 log
 ```
+## Step 10: Locate VirSorter2 results and count viral contigs
 
+After VirSorter2 finished, navigate to the output directory and inspect the result files.
+
+```bash
+cd /home/pj288/project_fastq/virsorter/vs2-SRR6996007
+ls
+```
+
+Output:
+
+```bash
+config.yaml
+final-viral-boundary.tsv
+final-viral-combined.fa
+final-viral-score.tsv
+iter-0
+log
+```
+
+Count the total number of viral contigs:
+
+```bash
+grep -c ">" final-viral-combined.fa
+```
+
+Output:
+
+```bash
+17
+```
+
+VirSorter2 identified **17 viral contigs**.
+
+---
+
+## Step 11: Install SeqKit and filter contigs by length
+
+Activate the `megahit-env` environment and install SeqKit:
+
+```bash
+module load mamba
+mamba activate megahit-env
+mamba install -n megahit-env -c bioconda seqkit
+```
+
+After installation, remain in the VirSorter2 output directory:
+
+```bash
+cd /home/pj288/project_fastq/virsorter/vs2-SRR6996007
+```
+
+Count how many viral contigs are at least **5 kb** long:
+
+```bash
+seqkit seq -m 5000 final-viral-combined.fa | grep -c ">"
+```
+
+Output:
+
+```bash
+17
+```
+
+Create a filtered FASTA file containing only contigs at least **5 kb** long:
+
+```bash
+seqkit seq -m 5000 final-viral-combined.fa > final-viral-combined_min5kb.fa
+```
+
+Verify the number of contigs in the filtered file:
+
+```bash
+grep -c ">" final-viral-combined_min5kb.fa
+```
+
+Output:
+
+```bash
+17
+```
+
+---
+
+## Interpretation
+
+- VirSorter2 identified **17 total viral contigs**
+- Filtering with SeqKit showed that **all 17 viral contigs were at least 5,000 bp long**
+- Therefore, no viral contigs were removed during the 5 kb filtering step
+
+The filtered file for downstream analysis is:
+
+```bash
+final-viral-combined_min5kb.fa
+```
 ---
 
 ## Updated Project Directory Structure
