@@ -914,13 +914,58 @@ checkv download_database ./
 
 ---
 
-## 3. Run CheckV
+## 3. Run CheckV (Slurm)
+
+Create Slurm script:
 
 ```bash
-checkv end_to_end \
-/home/osh10/project_fastq/virsorter/vs2-SRR6996007/votus_final.fna \
-vOTUs/ \
--d /home/osh10/project_fastq/checkv/checkv-db-v1.5
+nano run_checkv.slurm
+```
+
+Contents of script:
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=checkv
+#SBATCH --output=/home/osh10/project_fastq/logs/checkv-%j.out
+#SBATCH --error=/home/osh10/project_fastq/logs/checkv-%j.err
+#SBATCH --time=03:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=16G
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=osh10@georgetown.edu
+
+module load checkv
+
+CHECKVDB="/home/osh10/project_fastq/checkv/checkv-db-v1.5"
+INPUT="/home/osh10/project_fastq/virsorter/vs2-SRR6996007/votus_final.fna"
+OUTDIR="/home/osh10/project_fastq/checkv/vOTUs"
+
+mkdir -p "${OUTDIR}"
+
+echo "Running CheckV on ${INPUT}"
+checkv end_to_end "${INPUT}" "${OUTDIR}" -d "${CHECKVDB}" -t ${SLURM_CPUS_PER_TASK}
+echo "Done."
+```
+
+Submit job:
+
+```bash
+sbatch run_checkv.slurm
+```
+
+Check job status:
+
+```bash
+squeue -u osh10
+```
+
+Output directory:
+
+```
+/home/osh10/project_fastq/checkv/vOTUs/
 ```
 
 ---
