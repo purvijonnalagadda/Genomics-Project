@@ -875,11 +875,11 @@ project_fastq/
 # Date: 3/24/2026
 
 ## Goal:
-1. Identifies viral contigs (VirSorter2)
-2. Clusters into vOTUs
-3. Assesses genome quality (CheckV)
-4. Maps reads to class pooled vOTUs (Bowtie2)
-5. Uploads BAM files for class-wide analysis
+1. Identify viral contigs (VirSorter2)
+2. Cluster into vOTUs
+3. Assess genome quality (CheckV)
+4. Map reads to class pooled vOTUs (Bowtie2)
+5. Upload BAM files for class-wide analysis
 
 ---
 
