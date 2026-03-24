@@ -874,10 +874,7 @@ project_fastq/
 
 # Date: 3/24/2026
 
-# Viral Metagenomics Pipeline: vOTUs, CheckV, and Bowtie2 Mapping
-
-## Overview
-This workflow:
+## Goal:
 1. Identifies viral contigs (VirSorter2)
 2. Clusters into vOTUs
 3. Assesses genome quality (CheckV)
