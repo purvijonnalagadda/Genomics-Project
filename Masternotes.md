@@ -871,3 +871,212 @@ project_fastq/
 │
 └── raw/ trimmed/ projectfastqc_out/
 ```
+
+# Date: 3/24/2026
+
+# Viral Metagenomics Pipeline: vOTUs, CheckV, and Bowtie2 Mapping
+
+## Overview
+This workflow:
+1. Identifies viral contigs (VirSorter2)
+2. Clusters into vOTUs
+3. Assesses genome quality (CheckV)
+4. Maps reads to class pooled vOTUs (Bowtie2)
+5. Uploads BAM files for class-wide analysis
+
+---
+
+## 1. Locate vOTU File
+
+```bash
+cd /home/osh10/project_fastq/virsorter/vs2-SRR6996007
+ls
+```
+
+vOTU file used:
+```
+votus_final.fna
+```
+
+Get full path:
+```bash
+realpath votus_final.fna
+```
+
+---
+
+## 2. Set Up CheckV
+
+```bash
+mkdir -p /home/osh10/project_fastq/checkv
+cd /home/osh10/project_fastq/checkv
+
+module load checkv
+checkv download_database ./
+```
+
+---
+
+## 3. Run CheckV
+
+```bash
+checkv end_to_end \
+/home/osh10/project_fastq/virsorter/vs2-SRR6996007/votus_final.fna \
+vOTUs/ \
+-d /home/osh10/project_fastq/checkv/checkv-db-v1.5
+```
+
+---
+
+## 4. CheckV Results
+
+```bash
+cd /home/osh10/project_fastq/checkv/vOTUs
+ls
+```
+
+Main results file:
+```
+quality_summary.tsv
+```
+
+```bash
+column -t quality_summary.tsv | less -S
+tail -n +2 quality_summary.tsv | cut -f8 | sort | uniq -c
+```
+
+---
+
+## 5. Download Class Pooled vOTUs
+
+```bash
+cd /home/osh10/project_fastq/bowtie2
+gcloud storage cp gs://gu-biology-dept-class/ClassProject/votus_10kb_6samples.fna .
+```
+
+---
+
+## 6. Build Bowtie2 Index
+
+```bash
+srun --pty bash
+module load bowtie2
+
+bowtie2-build votus_10kb_6samples.fna votu_index
+
+exit
+```
+
+---
+
+## 7. Locate Trimmed Reads
+
+```bash
+find /home/osh10/project_fastq/trimmed -type f | grep paired
+```
+
+---
+
+## 8. Bowtie2 + Samtools
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=bowtie2_vOTUs
+#SBATCH --output=/home/osh10/project_fastq/logs/bowtie-%j.out
+#SBATCH --error=/home/osh10/project_fastq/logs/bowtie-%j.err
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=osh10@georgetown.edu
+#SBATCH --time=8:00:00
+#SBATCH --mem=16G
+
+module purge
+module load bowtie2/2.5.4
+module load samtools
+
+SAMPLE="SRR6996007"
+INDEX="/home/osh10/project_fastq/bowtie2/votu_index"
+OUTPUTDIR="/home/osh10/project_fastq/bowtie2/${SAMPLE}"
+
+mkdir -p "${OUTPUTDIR}"
+cd "${OUTPUTDIR}"
+
+bowtie2 -p 8 \
+  -x "${INDEX}" \
+  -1 "/home/osh10/project_fastq/trimmed/SRR6996007_R1_paired.fastq.gz" \
+  -2 "/home/osh10/project_fastq/trimmed/SRR6996007_R2_paired.fastq.gz" \
+| samtools view -bS - > "${SAMPLE}.bam"
+
+samtools sort "${SAMPLE}.bam" > "${SAMPLE}_sorted.bam"
+samtools index "${SAMPLE}_sorted.bam"
+```
+
+---
+
+## 9. Rename Output
+
+```bash
+mv sample1_osh10_sorted.bam sample7_osh10_sorted.bam
+mv sample1_osh10_sorted.bam.bai sample7_osh10_sorted.bam.bai
+```
+
+---
+
+## 10. Upload
+
+```bash
+gcloud storage cp sample7_osh10_sorted.bam gs://osh10/
+gcloud storage cp sample7_osh10_sorted.bam.bai gs://osh10/
+```
+
+---
+
+## Conceptual Notes
+
+- vOTUs reduce redundancy and represent viral populations  
+- pooled vOTUs increase diversity and improve genome reconstruction  
+- mapping identifies viral presence and abundance  
+
+---
+
+## Updated Directory Structure
+
+```
+/home/osh10/project_fastq/
+├── raw/                          # raw FASTQ files
+├── trimmed/                      # trimmed reads (Trimmomatic output)
+│   ├── SRR6996007_R1_paired.fastq.gz
+│   ├── SRR6996007_R2_paired.fastq.gz
+│   ├── SRR6996007_R1_unpaired.fastq.gz
+│   └── SRR6996007_R2_unpaired.fastq.gz
+│
+├── virsorter/
+│   └── vs2-SRR6996007/
+│       ├── final-viral-combined.fa
+│       ├── final-viral-combined_min5kb.fa
+│       ├── final-viral-score.tsv
+│       ├── final-viral-boundary.tsv
+│       ├── votus_final.fna              # vOTUs (used for CheckV)
+│       ├── clusters.tsv
+│       ├── ani.tsv
+│       └── iter-0/
+│
+├── checkv/
+│   ├── checkv-db-v1.5/                 # CheckV database
+│   └── vOTUs/                          # CheckV output
+│       ├── quality_summary.tsv
+│       ├── completeness.tsv
+│       ├── contamination.tsv
+│       ├── complete_genomes.tsv
+│       ├── viruses.fna
+│       └── proviruses.fna
+│
+├── bowtie2/
+│   ├── votus_10kb_6samples.fna         # class pooled vOTUs
+│   ├── votu_index.*                    # bowtie2 index files
+│   └── SRR6996007/
+│       ├── SRR6996007.bam              # unsorted BAM
+│       ├── sample7_osh10_sorted.bam    # final BAM
+│       └── sample7_osh10_sorted.bam.bai
+│
+└── logs/                              # slurm output/error logs
+```
