@@ -871,3 +871,93 @@ project_fastq/
 │
 └── raw/ trimmed/ projectfastqc_out/
 ```
+# Date: 3/24/2026
+
+## Goal  
+Evaluate viral contig quality using CheckV and quantify viral abundance by mapping reads to vOTUs using Bowtie2.
+
+---
+
+## Workflow Overview  
+
+1. Run CheckV on clustered vOTUs  
+2. Interpret genome quality and completeness  
+3. Build Bowtie2 index using pooled vOTUs  
+4. Align trimmed reads to vOTUs  
+5. Generate sorted BAM files for downstream analysis  
+
+---
+
+## Step 1: Run CheckV on vOTUs  
+
+CheckV was used to assess completeness, contamination, and quality of viral contigs derived from clustering.
+
+Input file (vOTUs):  
+
+/home/pj288/project_fastq/virsorter/vs2-SRR6996007/votus_final.fna
+
+
+CheckV was run using a SLURM script with the `end_to_end` pipeline.
+
+---
+
+## Step 2: Evaluate CheckV output  
+
+Results were obtained from:
+
+
+quality_summary.tsv
+
+
+### Quality Summary
+
+- **Complete (high-quality):** 1  
+- **Medium-quality:** 1  
+- **Low-quality:** 11  
+- **Not determined:** 4  
+
+### Interpretation  
+
+The majority of viral contigs were classified as low-quality genome fragments, which is expected in metagenomic datasets due to incomplete assembly and limited sequencing depth. One contig was identified as a complete, high-quality viral genome, and one additional contig was near-complete. Several contigs were classified as “not determined,” indicating insufficient evidence for viral origin.
+
+---
+
+## Step 3: Prepare Bowtie2 alignment  
+
+A pooled vOTU dataset was used for alignment to improve detection and comparison across samples.
+
+Download pooled vOTUs:
+
+```bash
+gcloud storage cp gs://gu-biology-dept-class/ClassProject/votus_10kb_6samples.fna .
+
+Build Bowtie2 index:
+
+module load bowtie2
+bowtie2-build votus_10kb_6samples.fna votu_index
+Step 4: Align reads to vOTUs
+
+Trimmed paired-end reads were aligned to the pooled vOTUs to estimate viral abundance.
+
+bowtie2 -p 8 -x votu_index \
+-1 /home/pj288/project_fastq/trimmed/R1_paired.fastq.gz \
+-2 /home/pj288/project_fastq/trimmed/R2_paired.fastq.gz \
+| samtools view -bS - > SRR6996007.bam
+
+Sort and index BAM file:
+
+samtools sort SRR6996007.bam > SRR6996007_sorted.bam
+samtools index SRR6996007_sorted.bam
+Step 5: Output
+
+Final alignment files:
+
+SRR6996007_sorted.bam
+SRR6996007_sorted.bam.bai
+
+These files will be used for downstream analysis of viral abundance and coverage across vOTUs.
+
+Notes
+Initial Bowtie2 run failed due to incorrect read file names; corrected by using trimmed paired reads (R1_paired.fastq.gz, R2_paired.fastq.gz)
+Upload to class bucket was restricted due to permission issues; file was instead uploaded to assigned bucket directory with proper labeling
+Proper labeling format used: sample1_pj288_sorted.bam
