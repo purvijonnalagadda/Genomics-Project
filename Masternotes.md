@@ -1123,6 +1123,250 @@ gcloud storage cp sample7_osh10_sorted.bam.bai gs://osh10/
 └── logs/                              # slurm output/error logs
 ```
 # Date: 3/26/2026
+## Goal
+Calculate alpha diversity metrics from the class vOTU abundance table and visualize viral community patterns using barplots and a heat map. :contentReference[oaicite:0]{index=0}
+
+---
+
+## Workflow Overview
+
+1. Load required R packages  
+2. Import the vOTU abundance table as a TSV  
+3. Reformat the data into a numeric abundance matrix  
+4. Calculate per-sample richness and Shannon diversity  
+5. Generate barplots for alpha diversity  
+6. Filter vOTUs by TPM abundance  
+7. Log-transform TPM values  
+8. Generate a clustered heat map of vOTU relative abundance  
+
+---
+
+## Input File
+
+```r
+ClassProject_votus_12367_coverm.tsv
+## STEP 1: Load packages
+- Install (once): vegan, pheatmap, RColorBrewer
+- Load each session:
+  - vegan → diversity metrics
+  - pheatmap → heatmap plotting
+  - readr → reading TSV files
+
+---
+
+## STEP 2: Import data
+- Read TSV file: ClassProject_votus_12367_coverm.tsv
+- Keep original column names (important for TPM detection)
+
+---
+
+## STEP 3: Format abundance matrix
+- Set Contig column as row names (each row = vOTU)
+- Remove Contig column → keep only numeric sample data
+- Convert all columns to numeric
+
+Result:
+- Rows = vOTUs
+- Columns = samples
+- Values = abundance (TPM or counts)
+
+---
+
+## STEP 4: Prepare for diversity analysis
+- Transpose matrix:
+  - Rows → samples
+  - Columns → vOTUs
+- Remove samples with total abundance = 0
+
+---
+
+## STEP 5: Calculate alpha diversity
+- Richness = number of vOTUs per sample
+- Shannon = accounts for richness + evenness
+
+Output:
+- Data frame with:
+  - Sample
+  - Richness
+  - Shannon
+
+---
+
+## STEP 6: Plot alpha diversity
+- Barplot 1: Richness per sample
+  - Shows number of detected vOTUs
+- Barplot 2: Shannon diversity per sample
+  - Shows diversity + distribution balance
+
+Interpretation:
+- Higher richness → more vOTUs present
+- Higher Shannon → more even + diverse community
+
+---
+
+## STEP 7: Prepare data for heatmap
+- Re-read file using read_tsv
+- Select only columns ending in "TPM"
+- Keep Contig + TPM columns only
+
+Cleaning:
+- Remove specific contig: S1k141_26921||full
+
+---
+
+## STEP 8: Filter low-abundance vOTUs
+- For each vOTU:
+  - Compute max TPM across samples
+- Keep only vOTUs where max TPM > threshold (e.g., 10)
+
+Purpose:
+- Removes noise
+- Focuses on biologically meaningful signals
+
+---
+
+## STEP 9: Build heatmap matrix
+- Convert filtered table → numeric matrix
+- Set rownames = Contig IDs
+
+---
+
+## STEP 10: Log transform data
+- Apply log10(TPM + 1)
+
+Reason:
+- Reduces skew
+- Improves visualization of differences
+- Prevents extreme values from dominating
+
+---
+
+## STEP 11: Generate heatmap
+- Cluster rows (vOTUs) → groups similar abundance patterns
+- Cluster columns (samples) → groups similar samples
+- Use custom color gradient
+
+Heatmap interpretation:
+- Rows = vOTUs
+- Columns = samples
+- Color intensity = relative abundance
+- Clusters reveal:
+  - Shared viral profiles
+  - Sample similarity
+  - Dominant vs rare vOTUs
+
+---
+
+## FINAL OUTPUTS
+1. Richness barplot (per sample)
+2. Shannon diversity barplot (per sample)
+3. Clustered heatmap of log-transformed TPM
+
+---
+
+## BIG PICTURE
+- Diversity plots → summarize within-sample variation (alpha diversity)
+- Heatmap → shows between-sample structure and vOTU patterns
+- Together → give a complete view of viral community composition
+the R file steps is what my prof gave me, i just filled in the file name and made the graphs
+# Alpha Diversity + Heatmap (Class R Script)
+
+## What I did
+- Used the R script provided by the professor
+- Updated only the required inputs:
+  - File name: ClassProject_votus_12367_coverm.tsv
+  - TPM threshold (for heatmap filtering)
+- Ran the script without modifying the workflow or functions
+- Generated all required plots from the provided pipeline
+
+---
+
+## Workflow (as given in R file)
+
+### 1. Load packages
+- vegan → diversity calculations
+- pheatmap → heatmap visualization
+- RColorBrewer → color palettes
+- readr → reading TSV files
+
+---
+
+### 2. Import data
+- Read in TSV file containing vOTU abundance
+- Data structure:
+  - First column = Contig (vOTU ID)
+  - Remaining columns = sample abundances (TPM)
+
+---
+
+### 3. Format data
+- Set Contig column as row names
+- Remove Contig column from matrix
+- Convert all values to numeric
+
+Result:
+- Rows = vOTUs
+- Columns = samples
+
+---
+
+### 4. Alpha diversity calculations
+- Transpose matrix:
+  - Rows = samples
+  - Columns = vOTUs
+- Remove samples with zero total abundance
+
+Compute:
+- Richness (specnumber) → number of vOTUs per sample
+- Shannon diversity (diversity) → accounts for richness + evenness
+
+Store results in a data frame (alpha_div)
+
+---
+
+### 5. Plot alpha diversity
+- Barplot: Richness per sample
+- Barplot: Shannon diversity per sample
+
+Purpose:
+- Compare diversity across samples
+
+---
+
+### 6. Heatmap preparation
+- Re-read data using read_tsv
+- Select only TPM columns
+- Keep Contig column for labeling
+
+Cleaning steps:
+- Remove specific contig: S1k141_26921||full
+- Filter out low-abundance vOTUs using TPM threshold
+
+---
+
+### 7. Heatmap matrix setup
+- Convert filtered data to numeric matrix
+- Assign row names = Contig IDs
+
+---
+
+### 8. Log transformation
+- Apply log10(TPM + 1)
+
+Purpose:
+- Normalize skewed abundance values
+- Improve visualization
+
+---
+
+### 9. Generate heatmap
+- Cluster rows (vOTUs)
+- Cluster columns (samples)
+- Apply color gradient
+
+---
+
+## Outputs
 <img width="1512" height="1008" alt="image" src="https://github.com/user-attachments/assets/c5fb9e07-d0e2-4b9e-bc98-51c3a9ed0c1c" />
 <img width="1512" height="1050" alt="image" src="https://github.com/user-attachments/assets/a7d1f445-5afb-49ba-ac59-5112c23b944d" />
 <img width="1512" height="1050" alt="image" src="https://github.com/user-attachments/assets/499e654c-5d11-4f94-b055-281d59e4094b" />
