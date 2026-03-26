@@ -1124,4 +1124,7 @@ gcloud storage cp sample7_osh10_sorted.bam.bai gs://osh10/
 ```
 # Date: 3/26/2026
 <img width="1512" height="1008" alt="image" src="https://github.com/user-attachments/assets/c5fb9e07-d0e2-4b9e-bc98-51c3a9ed0c1c" />
+<img width="1512" height="1050" alt="image" src="https://github.com/user-attachments/assets/a7d1f445-5afb-49ba-ac59-5112c23b944d" />
+<img width="1512" height="1050" alt="image" src="https://github.com/user-attachments/assets/499e654c-5d11-4f94-b055-281d59e4094b" />
+
 
