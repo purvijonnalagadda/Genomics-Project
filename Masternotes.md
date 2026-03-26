@@ -1258,25 +1258,8 @@ Heatmap interpretation:
 3. Clustered heatmap of log-transformed TPM
 
 ---
-
-## BIG PICTURE
-- Diversity plots → summarize within-sample variation (alpha diversity)
-- Heatmap → shows between-sample structure and vOTU patterns
-- Together → give a complete view of viral community composition
-the R file steps is what my prof gave me, i just filled in the file name and made the graphs
 # Alpha Diversity + Heatmap (Class R Script)
-
-## What I did
-- Used the R script provided by the professor
-- Updated only the required inputs:
-  - File name: ClassProject_votus_12367_coverm.tsv
-  - TPM threshold (for heatmap filtering)
-- Ran the script without modifying the workflow or functions
-- Generated all required plots from the provided pipeline
-
 ---
-
-## Workflow (as given in R file)
 
 ### 1. Load packages
 - vegan → diversity calculations
