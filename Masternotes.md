@@ -1140,11 +1140,6 @@ Calculate alpha diversity metrics from the class vOTU abundance table and visual
 8. Generate a clustered heat map of vOTU relative abundance  
 
 ---
-
-## Input File
-
-```r
-ClassProject_votus_12367_coverm.tsv
 ## STEP 1: Load packages
 - Install (once): vegan, pheatmap, RColorBrewer
 - Load each session:
