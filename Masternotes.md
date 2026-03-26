@@ -1124,7 +1124,7 @@ gcloud storage cp sample7_osh10_sorted.bam.bai gs://osh10/
 ```
 # Date: 3/26/2026
 ## Goal
-Calculate alpha diversity metrics from the class vOTU abundance table and visualize viral community patterns using barplots and a heat map. :contentReference[oaicite:0]{index=0}
+Calculate alpha diversity metrics from the class vOTU abundance table and visualize viral community patterns using barplots and a heat map.
 
 ---
 
