@@ -1122,3 +1122,6 @@ gcloud storage cp sample7_osh10_sorted.bam.bai gs://osh10/
 │
 └── logs/                              # slurm output/error logs
 ```
+# Date: 3/26/2026
+<img width="1512" height="1008" alt="image" src="https://github.com/user-attachments/assets/c5fb9e07-d0e2-4b9e-bc98-51c3a9ed0c1c" />
+
