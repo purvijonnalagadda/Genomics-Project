@@ -1,4 +1,31 @@
-# New Project Notes
+# Metagenomic Viral Analysis Pipeline
+
+## Project Summary
+This project analyzes metagenomic sequencing data to identify and characterize viral populations. Starting from raw sequencing reads, the workflow performs quality control, assembly, viral identification, clustering into viral operational taxonomic units (vOTUs), and diversity analysis.
+
+## Dataset
+- Source: NCBI SRA
+- BioSample: SAMN08784165
+- Run ID: SRR6996007
+
+## Workflow Overview
+1. Quality control and trimming of raw reads
+2. Metagenome assembly using MEGAHIT
+3. Viral contig identification using VirSorter2
+4. Filtering and clustering into vOTUs
+5. Genome quality assessment (CheckV)
+6. Read mapping and abundance estimation
+7. Diversity analysis and visualization
+
+## Key Results
+- Total contigs assembled: ~20,000
+- Viral contigs identified: 17
+- vOTUs identified: 17 (all unique)
+- All viral contigs were ≥5 kb
+- Viral diversity varied across samples (Shannon + richness metrics)
+
+## Conclusion
+This pipeline successfully reconstructed viral sequences from metagenomic data and demonstrated how bioinformatics tools can be combined to move from raw sequencing reads to ecological insights about viral communities.
 
 # Date: 3/12/2026
 
@@ -212,6 +239,17 @@ Adapter contamination was reduced after trimming, indicating that adapter sequen
 Trimmed reads showed a range of lengths due to removal of low-quality bases and adapter sequences, with all reads remaining longer than the **50 bp minimum threshold**.
 
 Overall, trimming improved sequencing read quality by removing low-quality regions and adapter contamination, resulting in a cleaner dataset for downstream analysis.
+
+### Why trim sequencing reads?
+
+Trimming removes low-quality bases and adapter contamination, which:
+
+- Improves read accuracy  
+- Reduces errors during assembly  
+- Prevents artificial inflation of diversity  
+- Leads to more reliable downstream analyses  
+
+Without trimming, poor-quality reads can negatively impact assembly and viral detection.
 
 ---
 
@@ -451,7 +489,17 @@ final.contigs.fa  FASTA   DNA     20,288  9,474,621      204      467  129,544  
 Overall, the MEGAHIT assembly successfully generated contigs suitable for downstream analyses such as:
 - gene prediction  
 - taxonomic classification  
-- functional annotation  
+- functional annotation
+
+### Why assemble reads?
+
+Assembly reconstructs longer contiguous sequences (contigs) from short sequencing reads, which:
+
+- Enables identification of genes and genomes  
+- Is required for tools like VirSorter2  
+- Allows detection of viral sequences that cannot be identified from raw reads alone  
+
+Metagenomic assembly is especially important because the data contains mixed microbial communities.
 
 ---
 
@@ -849,6 +897,28 @@ Output:
 - vclust grouped the sequences into **17 vOTUs**
 - Therefore, each viral contig represented a unique viral operational taxonomic unit
 - `votus_final.fna` contains the final non-redundant representative viral sequences for downstream analysis
+
+## Why filter contigs ≥ 5 kb?
+
+We filtered viral contigs to include only sequences ≥5,000 bp because:
+
+- Short contigs are more likely to be assembly artifacts or incomplete genomes  
+- Viral identification tools (like VirSorter2) are more reliable on longer sequences  
+- Many downstream analyses (e.g., vOTU clustering, CheckV) assume sufficiently long contigs  
+- This threshold is commonly used in viral metagenomics to improve confidence in biological interpretation  
+
+In this dataset, all viral contigs were already ≥5 kb, so no sequences were removed.
+
+### Why cluster into vOTUs?
+
+Clustering viral contigs into vOTUs reduces redundancy and groups similar viral genomes together.
+
+- 95% ANI threshold approximates species-level grouping  
+- Helps standardize viral diversity comparisons  
+- Prevents counting nearly identical sequences as separate viruses  
+
+In this dataset, each contig formed its own vOTU, indicating high diversity.
+
 ## Updated Project Directory Structure
 
 ```
@@ -1346,6 +1416,23 @@ Purpose:
 <img width="1512" height="1050" alt="image" src="https://github.com/user-attachments/assets/a7d1f445-5afb-49ba-ac59-5112c23b944d" />
 <img width="1512" height="1050" alt="image" src="https://github.com/user-attachments/assets/499e654c-5d11-4f94-b055-281d59e4094b" />
 <img width="1512" height="1008" alt="image" src="https://github.com/user-attachments/assets/c5fb9e07-d0e2-4b9e-bc98-51c3a9ed0c1c" />
+
+---
+## Methods Summary
+
+This analysis was conducted using a high-performance computing (HPC) environment. Key tools included:
+
+- FastQC for quality control  
+- Trimmomatic for read trimming  
+- MEGAHIT for assembly  
+- VirSorter2 for viral identification  
+- SeqKit for sequence filtering  
+- vclust for vOTU clustering  
+- CheckV for genome quality assessment  
+- Bowtie2 for read mapping  
+- R (vegan, pheatmap) for diversity analysis  
+
+All analyses were performed using command-line tools and reproducible workflows.
 
 
 
